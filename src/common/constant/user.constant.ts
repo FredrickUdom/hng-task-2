@@ -1,4 +1,4 @@
-export const USER_CREATED = 'User Signed in Successfully ';
+export const USER_CREATED = 'Registration successful ';
 export const LOGGED_IN = 'User successfully logged in';
 export const DATA_FETCH = 'Data fetched successfully';
 

@@ -1,11 +1,19 @@
 import { Injectable } from '@nestjs/common';
 import { CreateOrganizationDto } from './dto/create-organization.dto';
 import { UpdateOrganizationDto } from './dto/update-organization.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Organization } from './entities/organization.entity';
+import { User } from '../user/entities/user.entity';
 
 @Injectable()
 export class OrganizationService {
-  create(createOrganizationDto: CreateOrganizationDto) {
-    return 'This action adds a new organization';
+  constructor(@InjectRepository(Organization) private organizationRepository: Repository<Organization>, @InjectRepository(User) private userRepository:Repository<User>,){}
+ async create(createOrganizationDto: CreateOrganizationDto) {
+    const {name, description, userId}=createOrganizationDto;
+    // const user = await this.userRepository.findOne({where:{email}});
+
+    const organization = await this.organizationRepository.create({name, description, })
   }
 
   findAll() {
