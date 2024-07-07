@@ -15,10 +15,11 @@ async function bootstrap() {
   app.useGlobalPipes(new ValidationPipe({
     whitelist: true,
     forbidNonWhitelisted: true,
+    errorHttpStatusCode: 422,
   }));
   app.useGlobalInterceptors(new TransformationInterceptor(app.get(Reflector)));
   app.useGlobalFilters(new HttpExceptionFilter());
-  app.setGlobalPrefix('api/v1');
+  // app.setGlobalPrefix('api/v1');
   const Port = environment.PROJECT_PORT.PORT;
   await app.listen(Port, () => console.log(`project running on ${Port}`) );
 }
