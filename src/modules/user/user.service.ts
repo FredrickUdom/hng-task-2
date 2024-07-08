@@ -1,5 +1,5 @@
 import { HttpException, Injectable } from '@nestjs/common';
-import {  signUpDto } from './dto/create-user.dto';
+import { signUpDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
@@ -9,24 +9,34 @@ import { Organization } from '../organization/entities/organization.entity';
 import { JwtService } from '@nestjs/jwt';
 @Injectable()
 export class UserService {
-  constructor(@InjectRepository(User) private userRepository:Repository<User>, @InjectRepository(Organization) private organizationRepository: Repository<Organization>, private jwtService:JwtService){}
+  constructor(@InjectRepository(User) private userRepository: Repository<User>, @InjectRepository(Organization) private organizationRepository: Repository<Organization>, private jwtService: JwtService) { }
   async signUp(payload: signUpDto) {
     payload.email = payload.email.toLowerCase()
-    const {firstName, lastName, password, phone, email}= payload;
-    const finduser = await this.userRepository.findOne({where:{email:email}});
-    if(finduser){
+    const { firstName, lastName, password, phone, email } = payload;
+    const finduser = await this.userRepository.findOne({ where: { email: email } });
+    if (finduser) {
       throw new HttpException('User already exists', 400);
     }
     const hashPassword = await argon2.hash(password);
-    const user = await this.userRepository.save({firstName, lastName, phone, email, password: hashPassword});
+    const user = await this.userRepository.save({ firstName, lastName, phone, email, password: hashPassword });
     delete (await user).password;
 
-    await this.organizationRepository.save({
+    const organisation = await this.organizationRepository.create({
       name: `${firstName}'s Organisation`,
-      description: `This is a newly created Organisation`
+      description: `This is a newly created Organisation`,
+
     });
-    const accessToken =await this.generateToken((await user).id);
-    const data ={
+    
+    // organisation.user = [user];
+    const orga = new Organization()
+    orga.id = user.id
+    await this.organizationRepository.save(organisation);
+
+    user.organization = [organisation];
+    await this.userRepository.save(user);
+delete user.organization
+    const accessToken = await this.generateToken((await user).id);
+    const data = {
       accessToken,
       user,
     }
@@ -35,10 +45,10 @@ export class UserService {
   }
 
 
-  async generateToken(userId){
-    return await this.jwtService.sign({userId});
-    
-   
+  async generateToken(userId) {
+    return await this.jwtService.sign({ userId });
+
+
   }
 
   findAll() {
