@@ -5,7 +5,8 @@ import { environment } from './environment';
 config();
  
 export const dataSourceOptions: DataSourceOptions=({
-  type: environment.DATABASE.TYPE,
+  // type: environment.DATABASE.TYPE,
+  type: 'postgres',
   host: environment.DATABASE.HOST,
   port: environment.DATABASE.PORT,
   username: environment.DATABASE.USERNAME,
