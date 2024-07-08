@@ -1,5 +1,5 @@
 export const USER_CREATED = 'Registration successful ';
-export const LOGGED_IN = 'User successfully logged in';
+export const LOGGED_IN = 'Login successful';
 export const DATA_FETCH = 'Data fetched successfully';
 
 export const ORGANIZATION_CREATED= 'Organization Created Successfully';

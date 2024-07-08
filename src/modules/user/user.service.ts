@@ -1,5 +1,5 @@
 import { HttpException, Injectable } from '@nestjs/common';
-import { signUpDto } from './dto/create-user.dto';
+import { loginDto, signUpDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
@@ -10,6 +10,7 @@ import { JwtService } from '@nestjs/jwt';
 @Injectable()
 export class UserService {
   constructor(@InjectRepository(User) private userRepository: Repository<User>, @InjectRepository(Organization) private organizationRepository: Repository<Organization>, private jwtService: JwtService) { }
+
   async signUp(payload: signUpDto) {
     payload.email = payload.email.toLowerCase()
     const { firstName, lastName, password, phone, email } = payload;
@@ -41,6 +42,28 @@ delete user.organization
       user,
     }
 
+    return data
+  }
+
+  async login(payload:loginDto){
+
+    const { password, email}= payload;
+    const user = await this.userRepository.findOne({where:{email}});
+    if(!user){
+      throw new HttpException('wrong credentials on email', 400);
+    }
+    const passwordMatch = await this.verifyPassword(user.password, password);
+
+    if(!passwordMatch){
+      throw new HttpException('wrong credentials on password', 400);
+    }
+    
+    const accessToken = await this.generateToken((await user).id);
+    const data = {
+      accessToken,
+      user,
+    }
+    delete user.password;
     return data
   }
 

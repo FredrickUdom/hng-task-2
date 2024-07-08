@@ -1,9 +1,9 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, BadRequestException } from '@nestjs/common';
 import { UserService } from './user.service';
-import { signUpDto } from './dto/create-user.dto';
+import { loginDto, signUpDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { ResponseMessage } from '../../common/decorators/response.decorator';
-import { USER_CREATED } from '../../common/constant/user.constant';
+import { LOGGED_IN, USER_CREATED } from '../../common/constant/user.constant';
 import { STATUS_CODES } from 'http';
 import { AuthGuard } from 'src/common/guards/auth.guard';
 
@@ -13,8 +13,17 @@ export class UserController {
 
   @ResponseMessage(USER_CREATED)
   @Post('register')
-  async create(@Body() payload: signUpDto) {
+  async register(@Body() payload: signUpDto) {
     const submit = await this.userService.signUp(payload)
+    if(!submit){
+      throw new BadRequestException('Registration unsuccessful ')
+    }
+    return submit
+  }
+  @ResponseMessage(LOGGED_IN)
+  @Post('login')
+  async login(@Body() payload: loginDto) {
+    const submit = await this.userService.login(payload)
     if(!submit){
       throw new BadRequestException('Registration unsuccessful ')
     }

@@ -22,3 +22,14 @@ export class signUpDto {
     phone: string;
 
 }
+export class loginDto {
+
+    @IsNotEmpty()
+    @IsEmail()
+    email: string;
+
+    @IsNotEmpty()
+    @IsString()
+    password: string;
+
+}
