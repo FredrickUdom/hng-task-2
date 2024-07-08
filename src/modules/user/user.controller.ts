@@ -1,10 +1,11 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, BadRequestException } from '@nestjs/common';
 import { UserService } from './user.service';
 import { signUpDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { ResponseMessage } from '../../common/decorators/response.decorator';
 import { USER_CREATED } from '../../common/constant/user.constant';
 import { STATUS_CODES } from 'http';
+import { AuthGuard } from 'src/common/guards/auth.guard';
 
 @Controller('auth')
 export class UserController {
@@ -12,11 +13,16 @@ export class UserController {
 
   @ResponseMessage(USER_CREATED)
   @Post('register')
-  create(@Body() payload: signUpDto) {
-    return this.userService.signUp(payload)
+  async create(@Body() payload: signUpDto) {
+    const submit = await this.userService.signUp(payload)
+    if(!submit){
+      throw new BadRequestException('Registration unsuccessful ')
+    }
+    return submit
   }
 
   @Get()
+  @UseGuards(AuthGuard)
   findAll() {
     return this.userService.findAll();
   }
