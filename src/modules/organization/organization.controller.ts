@@ -11,7 +11,7 @@ export class OrganizationController {
 
   @Post()
   create(@Body() createOrganizationDto: CreateOrganizationDto) {
-    return this.organizationService.create(createOrganizationDto);
+    return this.organizationService.createOrganization(createOrganizationDto);
   }
 
   @ResponseMessage(USER_CREATED)

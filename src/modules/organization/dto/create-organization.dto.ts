@@ -9,5 +9,7 @@ export class CreateOrganizationDto {
     @IsString()
     description: string;
 
+    @IsNotEmpty()
+    @IsString()
     userId: string;
 }

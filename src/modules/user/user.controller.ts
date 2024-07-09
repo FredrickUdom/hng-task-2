@@ -3,16 +3,16 @@ import { UserService } from './user.service';
 import { loginDto, signUpDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { ResponseMessage } from '../../common/decorators/response.decorator';
-import { LOGGED_IN, USER_CREATED } from '../../common/constant/user.constant';
+import { DATA_FETCH, LOGGED_IN, USER_CREATED } from '../../common/constant/user.constant';
 import { STATUS_CODES } from 'http';
 import { AuthGuard } from 'src/common/guards/auth.guard';
 
-@Controller('auth')
+@Controller()
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @ResponseMessage(USER_CREATED)
-  @Post('register')
+  @Post('auth/register')
   async register(@Body() payload: signUpDto) {
     const submit = await this.userService.signUp(payload)
     if(!submit){
@@ -21,7 +21,7 @@ export class UserController {
     return submit
   }
   @ResponseMessage(LOGGED_IN)
-  @Post('login')
+  @Post('auth/login')
   async login(@Body() payload: loginDto) {
     const submit = await this.userService.login(payload)
     if(!submit){
@@ -36,18 +36,12 @@ export class UserController {
     return this.userService.findAll();
   }
 
-  @Get(':id')
+  @ResponseMessage(DATA_FETCH)
+  @UseGuards(AuthGuard)
+  @Get('/api/users/:id')
   findOne(@Param('id') id: string) {
-    return this.userService.findOne(+id);
+    return this.userService.findOne(id);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.userService.update(+id, updateUserDto);
-  }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.userService.remove(+id);
-  }
 }

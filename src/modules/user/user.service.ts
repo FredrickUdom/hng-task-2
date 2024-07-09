@@ -1,4 +1,4 @@
-import { HttpException, Injectable } from '@nestjs/common';
+import { BadRequestException, HttpException, Injectable } from '@nestjs/common';
 import { loginDto, signUpDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -11,7 +11,7 @@ import { JwtService } from '@nestjs/jwt';
 export class UserService {
   constructor(@InjectRepository(User) private userRepository: Repository<User>, @InjectRepository(Organization) private organizationRepository: Repository<Organization>, private jwtService: JwtService) { }
 
-  async signUp(payload: signUpDto) {
+  async signUp(payload: signUpDto):Promise<any> {
     payload.email = payload.email.toLowerCase()
     const { firstName, lastName, password, phone, email } = payload;
     const finduser = await this.userRepository.findOne({ where: { email: email } });
@@ -45,17 +45,17 @@ delete user.organization
     return data
   }
 
-  async login(payload:loginDto){
+  async login(payload:loginDto):Promise<any>{
 
     const { password, email}= payload;
     const user = await this.userRepository.findOne({where:{email}});
     if(!user){
-      throw new HttpException('wrong credentials on email', 400);
+      throw new HttpException('Authentication failed', 401);
     }
     const passwordMatch = await this.verifyPassword(user.password, password);
 
     if(!passwordMatch){
-      throw new HttpException('wrong credentials on password', 400);
+      throw new HttpException('Authentication failed', 401);
     }
     
     const accessToken = await this.generateToken((await user).id);
@@ -74,21 +74,25 @@ delete user.organization
 
   }
 
-  findAll() {
-    return `This action returns all user`;
+  async findAll():Promise<User[]> {
+    const user = await this.userRepository.find({relations: ['organization']});
+    if(!user){
+      throw new BadRequestException('invalid details')
+    }
+    
+    return user
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} user`;
+  async findOne(id: string):Promise<User> {
+    const user = await this.userRepository.findOne({where:{id:id}, relations:['organization']});
+    if(!user){
+      throw new BadRequestException('No user found')
+    }
+    delete user.password
+    return user;
   }
 
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
-  }
 
-  remove(id: number) {
-    return `This action removes a #${id} user`;
-  }
 
   async verifyPassword(
     hashedPassword: string,
